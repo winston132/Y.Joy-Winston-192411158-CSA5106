@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+void buildCipher(char *cipher, const char *keyword) {
+    int used[26] = {0};
+    int j = 0;
+    char temp[100];
+
+    strcpy(temp, keyword);
+    for (int i = 0; temp[i] != '\0'; i++) {
+        temp[i] = toupper(temp[i]);
+        if (temp[i] >= 'A' && temp[i] <= 'Z') {
+            if (!used[temp[i] - 'A']) {
+                used[temp[i] - 'A'] = 1;
+                cipher[j++] = temp[i];
+            }
+        }
+    }
+
+    for (char ch = 'A'; ch <= 'Z'; ch++) {
+        if (!used[ch - 'A']) {
+            cipher[j++] = ch;
+        }
+    }
+    cipher[j] = '\0';
+}
+
+void encryptKeywordCipher(char *message, const char *keyword) {
+    char cipher[27];
+    char plain[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    buildCipher(cipher, keyword);
+
+    for (int i = 0; message[i] != '\0'; i++) {
+        char ch = toupper(message[i]);
+        if (ch >= 'A' && ch <= 'Z') {
+            int pos = ch - 'A';
+            message[i] = cipher[pos];
+        }
+    }
+}
+
+int main() {
+    char message[200];
+    char keyword[100];
+
+    printf("Enter keyword: ");
+    scanf("%s", keyword);
+
+    printf("Enter plaintext: ");
+    scanf(" %[^
+]s", message);
+
+    encryptKeywordCipher(message, keyword);
+
+    printf("Encrypted message: %s\n", message);
+    return 0;
+}
