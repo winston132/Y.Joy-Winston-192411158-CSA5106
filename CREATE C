@@ -1,0 +1,32 @@
+#include <stdio.h>
+
+int main() {
+    char msg[1000];
+    int k;
+
+    printf("Enter message: ");
+    fgets(msg, sizeof(msg), stdin);
+
+    printf("Enter shift (1-25): ");
+    scanf("%d", &k);
+
+    // Loop through each character until the end of the string
+    int i = 0;
+    while (msg[i] != '\0') {
+        char ch = msg[i];
+
+        // Shift uppercase letters
+        if (ch >= 'A' && ch <= 'Z') {
+            msg[i] = ((ch - 'A' + k) % 26) + 'A';
+        }
+        // Shift lowercase letters
+        else if (ch >= 'a' && ch <= 'z') {
+            msg[i] = ((ch - 'a' + k) % 26) + 'a';
+        }
+        
+        i++; // Move to the next character
+    }
+
+    printf("Encrypted message: %s", msg);
+    return 0;
+}
