@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+int gcd(int a, int b) {
+    while (b != 0) {
+        int t = a % b;
+        a = b;
+        b = t;
+    }
+    return a;
+}
+
+int modInverse(int a, int m) {
+    for (int x = 1; x < m; x++) {
+        if ((a * x) % m == 1) return x;
+    }
+    return -1;
+}
+
+void decryptAffine(char cipher[], int a, int b) {
+    int invA = modInverse(a, 26);
+    for (int i = 0; cipher[i] != '\0'; i++) {
+        char ch = cipher[i];
+        if (isupper(ch)) {
+            cipher[i] = 'A' + (invA * (ch - 'A' - b + 26)) % 26;
+        } else if (islower(ch)) {
+            cipher[i] = 'a' + (invA * (ch - 'a' - b + 26)) % 26;
+        }
+    }
+}
+
+int main() {
+    char cipher[200];
+    printf("Enter ciphertext: ");
+    fgets(cipher, sizeof(cipher), stdin);
+
+    for (int i = 0; cipher[i] != '\0'; i++) {
+        cipher[i] = toupper(cipher[i]);
+    }
+
+    int bestA = -1, bestB = -1;
+    char bestPlain[200];
+
+    int freq1 = 'B' - 'A';
+    int freq2 = 'U' - 'A';
+
+    for (int a = 1; a < 26; a++) {
+        if (gcd(a, 26) != 1) continue;
+        for (int b = 0; b < 26; b++) {
+            char test[200];
+            strcpy(test, cipher);
+            decryptAffine(test, a, b);
+
+            int score = 0;
+            for (int i = 0; test[i] != '\0'; i++) {
+                if (isalpha(test[i])) {
+                    int pos = toupper(test[i]) - 'A';
+                    if (pos == freq1 || pos == freq2) score++;
+                }
+            }
+
+            if (score > 0) {
+                if (bestA == -1 || score > 0) {
+                    bestA = a;
+                    bestB = b;
+                    strcpy(bestPlain, test);
+                }
+            }
+        }
+    }
+
+    if (bestA != -1) {
+        printf("Likely key: a = %d, b = %d\n", bestA, bestB);
+        printf("Decrypted text: %s\n", bestPlain);
+    } else {
+        printf("No suitable key found.\n");
+    }
+
+    return 0;
+}
