@@ -1,0 +1,117 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+char matrix[5][5];
+
+void buildMatrix(const char *keyword) {
+    char used[26] = {0};
+    int row = 0, col = 0;
+    char key[100];
+
+    strcpy(key, keyword);
+    strlwr(key);
+
+    for (int i = 0; key[i] != '\0'; i++) {
+        char ch = key[i];
+        if (ch == 'j') ch = 'i';
+        if (ch >= 'a' && ch <= 'z' && !used[ch - 'a']) {
+            used[ch - 'a'] = 1;
+            matrix[row][col++] = ch;
+            if (col == 5) {
+                col = 0;
+                row++;
+            }
+        }
+    }
+
+    for (char ch = 'a'; ch <= 'z'; ch++) {
+        if (ch == 'j') continue;
+        if (!used[ch - 'a']) {
+            matrix[row][col++] = ch;
+            if (col == 5) {
+                col = 0;
+                row++;
+            }
+        }
+    }
+}
+
+void printMatrix() {
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            printf("%c ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void prepareText(char *text) {
+    int len = strlen(text);
+    int j = 0;
+    for (int i = 0; i < len; i++) {
+        char ch = tolower(text[i]);
+        if (ch == 'j') ch = 'i';
+        if (ch >= 'a' && ch <= 'z') {
+            text[j++] = ch;
+        }
+    }
+    text[j] = '\0';
+}
+
+void playfairEncrypt(char *text, const char *keyword) {
+    buildMatrix(keyword);
+    prepareText(text);
+
+    int len = strlen(text);
+    char result[200];
+    int k = 0;
+
+    for (int i = 0; i < len; i += 2) {
+        char a = text[i];
+        char b = (i + 1 < len) ? text[i + 1] : 'x';
+        if (a == b) b = 'x';
+
+        int r1, c1, r2, c2;
+        for (int r = 0; r < 5; r++) {
+            for (int c = 0; c < 5; c++) {
+                if (matrix[r][c] == a) { r1 = r; c1 = c; }
+                if (matrix[r][c] == b) { r2 = r; c2 = c; }
+            }
+        }
+
+        if (r1 == r2) {
+            result[k++] = matrix[r1][(c1 + 1) % 5];
+            result[k++] = matrix[r2][(c2 + 1) % 5];
+        } else if (c1 == c2) {
+            result[k++] = matrix[(r1 + 1) % 5][c1];
+            result[k++] = matrix[(r2 + 1) % 5][c2];
+        } else {
+            result[k++] = matrix[r1][c2];
+            result[k++] = matrix[r2][c1];
+        }
+    }
+
+    result[k] = '\0';
+    strcpy(text, result);
+}
+
+int main() {
+    char message[200];
+    char keyword[100];
+
+    printf("Enter keyword: ");
+    scanf("%s", keyword);
+
+    printf("Enter plaintext: ");
+    scanf(" %[^
+]s", message);
+
+    playfairEncrypt(message, keyword);
+
+    printf("Playfair matrix:\n");
+    printMatrix();
+    printf("Encrypted text: %s\n", message);
+
+    return 0;
+}
