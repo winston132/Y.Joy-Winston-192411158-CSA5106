@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <ctype.h>
+
+int main() {
+    char msg[1000];
+    
+    // The key must contain all 26 letters of the alphabet in a substituted order.
+    // Index:    0123456789... (corresponds to A, B, C, D...)
+    // Letters:  ZYXWVUTSRQ... (maps A->Z, B->Y, C->X, D->W...)
+    char key[] = "ZYXWVUTSRQPONMLKJIHGFEDCBA"; 
+    
+    printf("Enter message to encrypt: ");
+    fgets(msg, sizeof(msg), stdin);
+
+    int i = 0;
+    while (msg[i] != '\0') {
+        char ch = msg[i];
+
+        // Encrypt uppercase letters
+        if (ch >= 'A' && ch <= 'Z') {
+            int index = ch - 'A'; // Find the alphabetical position (0 to 25)
+            msg[i] = key[index];   // Replace with the mapped ciphertext letter
+        }
+        // Encrypt lowercase letters
+        else if (ch >= 'a' && ch <= 'z') {
+            int index = ch - 'a'; // Find the alphabetical position (0 to 25)
+            // Replace with lowercase version of the key character
+            msg[i] = tolower(key[index]); 
+        }
+
+        i++;
+    }
+
+    printf("Encrypted message: %s", msg);
+    return 0;
+}
