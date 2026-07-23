@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+static char *ciphertext =
+    "53‡‡†305))6*;4826)4‡.)4‡);806*;48†8¶60))85;;]8*;:‡*8†83"
+    "(88)5*†;46(;88*96*?;8)*‡(;485);5*†2:*‡(;4956*2(5*—4)8¶8*"
+    ";4069285);)6†8)4‡‡;1(‡9;48081;8:8‡1;48†85;4)485†528806*81"
+    "(‡9;48;(88;4(‡?34;48)4‡;161;:188;‡?;";
+
+static int countChar(const char *text, char ch) {
+    int count = 0;
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (text[i] == ch) count++;
+    }
+    return count;
+}
+
+static void replaceAll(char *text, char from, char to) {
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (text[i] == from) text[i] = to;
+    }
+}
+
+int main(void) {
+    char decoded[1000];
+    strcpy(decoded, ciphertext);
+
+    /* Simple heuristic-based substitution demo */
+    replaceAll(decoded, '8', 'e');
+    replaceAll(decoded, '4', 't');
+    replaceAll(decoded, '‡', 'h');
+    replaceAll(decoded, ';', 'o');
+    replaceAll(decoded, '5', 'a');
+    replaceAll(decoded, '6', 'i');
+    replaceAll(decoded, '1', 'n');
+    replaceAll(decoded, '2', 'r');
+    replaceAll(decoded, '3', 's');
+    replaceAll(decoded, '0', 'd');
+    replaceAll(decoded, '9', 'l');
+    replaceAll(decoded, '7', 'u');
+    replaceAll(decoded, '(', 'm');
+    replaceAll(decoded, ')', 'c');
+    replaceAll(decoded, '*', 'y');
+    replaceAll(decoded, ']', 'f');
+    replaceAll(decoded, '¶', 'g');
+    replaceAll(decoded, '†', 'w');
+    replaceAll(decoded, ':', 'p');
+    replaceAll(decoded, '?', 'b');
+    replaceAll(decoded, '—', 'v');
+    replaceAll(decoded, '.', 'k');
+    replaceAll(decoded, '-', 'x');
+    replaceAll(decoded, ',', 'j');
+    replaceAll(decoded, '!', 'q');
+    replaceAll(decoded, '>', 'z');
+
+    printf("Decoded message:\n%s\n", decoded);
+    return 0;
+}
