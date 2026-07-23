@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+char matrix[5][5] = {
+    {'M','F','H','I','K'},
+    {'U','N','O','P','Q'},
+    {'Z','V','W','X','Y'},
+    {'E','L','A','R','G'},
+    {'D','S','T','B','C'}
+};
+
+void findPosition(char ch, int *row, int *col) {
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (matrix[i][j] == toupper(ch)) {
+                *row = i;
+                *col = j;
+                return;
+            }
+        }
+    }
+    *row = -1;
+    *col = -1;
+}
+
+void prepareText(char *text) {
+    int len = strlen(text);
+    int j = 0;
+    for (int i = 0; i < len; i++) {
+        char ch = toupper(text[i]);
+        if (ch == 'J') ch = 'I';
+        if (ch >= 'A' && ch <= 'Z') {
+            text[j++] = ch;
+        }
+    }
+    text[j] = '\0';
+}
+
+void playfairEncrypt(char *text) {
+    prepareText(text);
+
+    int len = strlen(text);
+    char result[500];
+    int k = 0;
+
+    for (int i = 0; i < len; i += 2) {
+        char a = text[i];
+        char b = (i + 1 < len) ? text[i + 1] : 'X';
+        if (a == b) b = 'X';
+
+        int r1, c1, r2, c2;
+        findPosition(a, &r1, &c1);
+        findPosition(b, &r2, &c2);
+
+        if (r1 == r2) {
+            result[k++] = matrix[r1][(c1 + 1) % 5];
+            result[k++] = matrix[r2][(c2 + 1) % 5];
+        } else if (c1 == c2) {
+            result[k++] = matrix[(r1 + 1) % 5][c1];
+            result[k++] = matrix[(r2 + 1) % 5][c2];
+        } else {
+            result[k++] = matrix[r1][c2];
+            result[k++] = matrix[r2][c1];
+        }
+    }
+
+    result[k] = '\0';
+    strcpy(text, result);
+}
+
+int main() {
+    char message[] = "Must see you over Cadogan West. Coming at once.";
+
+    playfairEncrypt(message);
+    printf("Encrypted message: %s\n", message);
+    return 0;
+}
