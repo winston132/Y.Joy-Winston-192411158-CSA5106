@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+
+// Example shift schedule for DES key generation
+int shiftSchedule[16] = {
+    1, 1, 2, 2, 2, 2, 2, 2,
+    1, 2, 2, 2, 2, 2, 2, 1
+};
+
+// Placeholder for permutation tables (PC1, PC2, IP, FP, E, P, S-boxes)
+// In a full implementation, you must define these tables.
+
+void generateSubkeys(uint64_t key, uint64_t subkeys[16]) {
+    // Apply PC1 permutation to reduce 64-bit key to 56 bits
+    // Split into C and D halves (28 bits each)
+    // Perform left shifts according to shiftSchedule
+    // Apply PC2 permutation to produce 48-bit subkeys
+    // Store in subkeys array
+}
+
+uint64_t desRound(uint64_t block, uint64_t subkey) {
+    // Expansion, XOR with subkey, S-box substitution, P permutation
+    // Return transformed block
+    return block; // placeholder
+}
+
+uint64_t desDecrypt(uint64_t ciphertext, uint64_t subkeys[16]) {
+    // Initial permutation (IP)
+    uint64_t block = ciphertext; // placeholder
+
+    // 16 rounds with subkeys in reverse order
+    for (int i = 15; i >= 0; i--) {
+        block = desRound(block, subkeys[i]);
+    }
+
+    // Final permutation (FP)
+    return block;
+}
+
+int main() {
+    uint64_t key = 0x133457799BBCDFF1ULL; // Example key
+    uint64_t ciphertext = 0x85E813540F0AB405ULL; // Example ciphertext
+
+    uint64_t subkeys[16];
+    generateSubkeys(key, subkeys);
+
+    uint64_t plaintext = desDecrypt(ciphertext, subkeys);
+
+    printf("Decrypted plaintext: %016llX\n", plaintext);
+    return 0;
+}
