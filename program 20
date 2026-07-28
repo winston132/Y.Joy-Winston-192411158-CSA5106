@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+// Placeholder block cipher encryption (replace with DES/3DES/AES)
+uint64_t encryptBlock(uint64_t block, uint64_t key) {
+    return block ^ key; // simplified placeholder
+}
+
+uint64_t decryptBlock(uint64_t block, uint64_t key) {
+    return block ^ key; // simplified placeholder
+}
+
+// ECB mode
+void ECB_Encrypt(uint64_t *plaintext, uint64_t *ciphertext, int blocks, uint64_t key) {
+    for (int i = 0; i < blocks; i++) {
+        ciphertext[i] = encryptBlock(plaintext[i], key);
+    }
+}
+
+void ECB_Decrypt(uint64_t *ciphertext, uint64_t *plaintext, int blocks, uint64_t key) {
+    for (int i = 0; i < blocks; i++) {
+        plaintext[i] = decryptBlock(ciphertext[i], key);
+    }
+}
+
+// CBC mode
+void CBC_Encrypt(uint64_t *plaintext, uint64_t *ciphertext, int blocks, uint64_t key, uint64_t iv) {
+    uint64_t prev = iv;
+    for (int i = 0; i < blocks; i++) {
+        uint64_t xored = plaintext[i] ^ prev;
+        ciphertext[i] = encryptBlock(xored, key);
+        prev = ciphertext[i];
+    }
+}
+
+void CBC_Decrypt(uint64_t *ciphertext, uint64_t *plaintext, int blocks, uint64_t key, uint64_t iv) {
+    uint64_t prev = iv;
+    for (int i = 0; i < blocks; i++) {
+        uint64_t decrypted = decryptBlock(ciphertext[i], key);
+        plaintext[i] = decrypted ^ prev;
+        prev = ciphertext[i];
+    }
+}
+
+int main() {
+    uint64_t plaintext[2] = {0x0123456789ABCDEFULL, 0x1111111111111111ULL};
+    uint64_t ciphertext[2], recovered[2];
+    uint64_t key = 0x133457799BBCDFF1ULL;
+    uint64_t iv  = 0xAABB09182736CCDDULL;
+
+    // ECB
+    ECB_Encrypt(plaintext, ciphertext, 2, key);
+    ECB_Decrypt(ciphertext, recovered, 2, key);
+
+    printf("ECB recovered: %016llX %016llX\n", recovered[0], recovered[1]);
+
+    // CBC
+    CBC_Encrypt(plaintext, ciphertext, 2, key, iv);
+    CBC_Decrypt(ciphertext, recovered, 2, key, iv);
+
+    printf("CBC recovered: %016llX %016llX\n", recovered[0], recovered[1]);
+
+    return 0;
+}
