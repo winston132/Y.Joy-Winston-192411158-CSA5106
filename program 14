@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <ctype.h>
+
+#define MOD 26
+
+// Encrypt plaintext with one-time pad key
+void encrypt(const char *plaintext, int *key, char *ciphertext) {
+    int len = strlen(plaintext);
+    for (int i = 0; i < len; i++) {
+        if (isalpha(plaintext[i])) {
+            int p = toupper(plaintext[i]) - 'A';
+            int c = (p + key[i]) % MOD;
+            ciphertext[i] = 'A' + c;
+        } else {
+            ciphertext[i] = plaintext[i]; // keep spaces/punctuation
+        }
+    }
+    ciphertext[len] = '\0';
+}
+
+// Decrypt ciphertext with one-time pad key
+void decrypt(const char *ciphertext, int *key, char *plaintext) {
+    int len = strlen(ciphertext);
+    for (int i = 0; i < len; i++) {
+        if (isalpha(ciphertext[i])) {
+            int c = toupper(ciphertext[i]) - 'A';
+            int p = (c - key[i] + MOD) % MOD;
+            plaintext[i] = 'A' + p;
+        } else {
+            plaintext[i] = ciphertext[i];
+        }
+    }
+    plaintext[len] = '\0';
+}
+
+int main() {
+    char plaintext[] = "MEET ME AT THE USUAL PLACE AT TEN RATHER THAN EIGHT OCLOCK";
+    int len = strlen(plaintext);
+
+    // Generate random key stream
+    int key[len];
+    srand(time(NULL));
+    for (int i = 0; i < len; i++) {
+        if (isalpha(plaintext[i]))
+            key[i] = rand() % MOD; // random shift 0–25
+        else
+            key[i] = 0; // no shift for spaces/punctuation
+    }
+
+    // Encrypt
+    char ciphertext[len+1];
+    encrypt(plaintext, key, ciphertext);
+    printf("Plaintext : %s\n", plaintext);
+    printf("Ciphertext: %s\n", ciphertext);
+
+    // Show key stream
+    printf("Key stream: ");
+    for (int i = 0; i < len; i++) {
+        printf("%d ", key[i]);
+    }
+    printf("\n");
+
+    // Decrypt
+    char recovered[len+1];
+    decrypt(ciphertext, key, recovered);
+    printf("Recovered : %s\n", recovered);
+
+    return 0;
+}
