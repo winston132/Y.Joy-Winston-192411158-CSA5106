@@ -1,0 +1,22 @@
+#include <stdio.h>
+#include <math.h>
+
+int main() {
+    // Step 1: Total possible keys (25!)
+    double total_keys = 1.0;
+    for (int i = 1; i <= 25; i++) {
+        total_keys *= i;
+    }
+
+    // Convert to log base 2
+    double log2_total = log2(total_keys);
+
+    // Step 2: Effective unique keys (25! / 4)
+    double unique_keys = total_keys / 4.0;
+    double log2_unique = log2(unique_keys);
+
+    printf("Total possible keys (ignoring duplicates): ~2^%.0f\n", log2_total);
+    printf("Effectively unique keys (considering duplicates): ~2^%.0f\n", log2_unique);
+
+    return 0;
+}
