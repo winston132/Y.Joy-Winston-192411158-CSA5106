@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <stdint.h>
+
+// Shift schedule for 16 rounds
+int shiftSchedule[16] = {
+    1, 1, 2, 2, 2, 2, 2, 2,
+    1, 2, 2, 2, 2, 2, 2, 1
+};
+
+// Left circular shift for 28-bit halves
+uint32_t leftShift28(uint32_t val, int shifts) {
+    return ((val << shifts) | (val >> (28 - shifts))) & 0x0FFFFFFF;
+}
+
+// Generate 16 subkeys: each 48 bits
+void generateSubkeys(uint64_t key, uint64_t subkeys[16]) {
+    // Apply PC1 permutation (here simplified: just split halves)
+    uint32_t C = (key >> 28) & 0x0FFFFFFF; // left 28 bits
+    uint32_t D = key & 0x0FFFFFFF;         // right 28 bits
+
+    for (int round = 0; round < 16; round++) {
+        // Shift halves according to schedule
+        C = leftShift28(C, shiftSchedule[round]);
+        D = leftShift28(D, shiftSchedule[round]);
+
+        // Subkey: first 24 bits from C, second 24 bits from D
+        uint64_t subkey = ((uint64_t)(C & 0xFFFFFF) << 24) | (D & 0xFFFFFF);
+        subkeys[round] = subkey;
+    }
+}
+
+// Example decryption using reversed subkeys
+void desDecrypt(uint64_t ciphertext, uint64_t subkeys[16]) {
+    printf("Decryption process:\n");
+    for (int round = 15; round >= 0; round--) {
+        printf("Round %2d using subkey: %012llX\n", 16-round, subkeys[round]);
+        // Here you would apply the DES round function with subkeys[round]
+    }
+}
+
+int main() {
+    uint64_t key = 0x133457799BBCDFF1ULL; // Example 64-bit key
+    uint64_t subkeys[16];
+
+    generateSubkeys(key, subkeys);
+
+    printf("Generated Subkeys:\n");
+    for (int i = 0; i < 16; i++) {
+        printf("K%-2d: %012llX\n", i+1, subkeys[i]);
+    }
+
+    uint64_t ciphertext = 0x85E813540F0AB405ULL; // Example ciphertext
+    desDecrypt(ciphertext, subkeys);
+
+    return 0;
+}
