@@ -1,0 +1,132 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+
+#define MOD 26
+
+// Approximate English letter frequencies (percentages)
+double englishFreq[26] = {
+    8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015,
+    6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749,
+    7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758,
+    0.978, 2.360, 0.150, 1.974, 0.074
+};
+
+// Compute frequency score for candidate plaintext
+double scoreText(const char *text) {
+    int counts[26] = {0};
+    int total = 0;
+    for (int i = 0; text[i]; i++) {
+        if (isalpha(text[i])) {
+            counts[toupper(text[i]) - 'A']++;
+            total++;
+        }
+    }
+    if (total == 0) return 0.0;
+
+    double score = 0.0;
+    for (int i = 0; i < 26; i++) {
+        double observed = (double)counts[i] / total * 100.0;
+        score += englishFreq[i] * observed; // dot product similarity
+    }
+    return score;
+}
+
+// Apply a substitution mapping to ciphertext
+void applyMapping(const char *cipher, const char *map, char *plain) {
+    int len = strlen(cipher);
+    for (int i = 0; i < len; i++) {
+        if (isalpha(cipher[i])) {
+            int c = toupper(cipher[i]) - 'A';
+            plain[i] = map[c];
+        } else {
+            plain[i] = cipher[i];
+        }
+    }
+    plain[len] = '\0';
+}
+
+int main() {
+    char cipher[] = "ZOL SLHZL AOLYB"; // Example ciphertext
+    int topN = 10; // user can change this
+
+    // Step 1: Count frequencies in ciphertext
+    int counts[26] = {0};
+    int total = 0;
+    for (int i = 0; cipher[i]; i++) {
+        if (isalpha(cipher[i])) {
+            counts[toupper(cipher[i]) - 'A']++;
+            total++;
+        }
+    }
+
+    // Step 2: Sort ciphertext letters by frequency
+    int order[26];
+    for (int i = 0; i < 26; i++) order[i] = i;
+    for (int i = 0; i < 26; i++) {
+        for (int j = i+1; j < 26; j++) {
+            if (counts[order[j]] > counts[order[i]]) {
+                int tmp = order[i];
+                order[i] = order[j];
+                order[j] = tmp;
+            }
+        }
+    }
+
+    // Step 3: Sort English letters by frequency
+    int engOrder[26];
+    for (int i = 0; i < 26; i++) engOrder[i] = i;
+    for (int i = 0; i < 26; i++) {
+        for (int j = i+1; j < 26; j++) {
+            if (englishFreq[engOrder[j]] > englishFreq[engOrder[i]]) {
+                int tmp = engOrder[i];
+                engOrder[i] = engOrder[j];
+                engOrder[j] = tmp;
+            }
+        }
+    }
+
+    // Step 4: Generate candidate mappings
+    struct {
+        double score;
+        char text[256];
+    } results[26];
+
+    for (int k = 0; k < 26; k++) {
+        char map[26];
+        for (int i = 0; i < 26; i++) {
+            map[order[i]] = 'A' + engOrder[(i+k)%26];
+        }
+        char plain[256];
+        applyMapping(cipher, map, plain);
+        results[k].score = scoreText(plain);
+        strcpy(results[k].text, plain);
+    }
+
+    // Step 5: Sort candidates by score
+    for (int i = 0; i < 26; i++) {
+        for (int j = i+1; j < 26; j++) {
+            if (results[j].score > results[i].score) {
+                double tmpScore = results[i].score;
+                char tmpText[256];
+                strcpy(tmpText, results[i].text);
+
+                results[i].score = results[j].score;
+                strcpy(results[i].text, results[j].text);
+
+                results[j].score = tmpScore;
+                strcpy(results[j].text, tmpText);
+            }
+        }
+    }
+
+    // Step 6: Print top N results
+    printf("Ciphertext: %s\n\n", cipher);
+    printf("Top %d candidate plaintexts:\n", topN);
+    for (int i = 0; i < topN && i < 26; i++) {
+        printf("Score %.2f | %s\n", results[i].score, results[i].text);
+    }
+
+    return 0;
+}
