@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MOD 26
+
+// Key matrix
+int K[2][2] = {{9,4},{5,7}};
+int Kinv[2][2] = {{5,12},{15,25}}; // Precomputed inverse mod 26
+
+// Convert char to number
+int charToNum(char c) {
+    return toupper(c) - 'A';
+}
+
+// Convert number to char
+char numToChar(int n) {
+    return 'A' + (n % MOD);
+}
+
+// Encrypt digraph
+void encryptPair(char p1, char p2, char *c1, char *c2) {
+    int v1 = charToNum(p1);
+    int v2 = charToNum(p2);
+    int r1 = (K[0][0]*v1 + K[0][1]*v2) % MOD;
+    int r2 = (K[1][0]*v1 + K[1][1]*v2) % MOD;
+    *c1 = numToChar(r1);
+    *c2 = numToChar(r2);
+}
+
+// Decrypt digraph
+void decryptPair(char c1, char c2, char *p1, char *p2) {
+    int v1 = charToNum(c1);
+    int v2 = charToNum(c2);
+    int r1 = (Kinv[0][0]*v1 + Kinv[0][1]*v2) % MOD;
+    int r2 = (Kinv[1][0]*v1 + Kinv[1][1]*v2) % MOD;
+    *p1 = numToChar(r1);
+    *p2 = numToChar(r2);
+}
+
+int main() {
+    char text[] = "MEETMEATTHEUSUALPLACEATTENRATHERTHANEIGHTOCLOCK";
+    char ciphertext[100], plaintext[100];
+    int len = strlen(text);
+
+    // Encryption
+    for(int i=0; i<len; i+=2) {
+        encryptPair(text[i], text[i+1], &ciphertext[i], &ciphertext[i+1]);
+    }
+    ciphertext[len] = '\0';
+    printf("Ciphertext: %s\n", ciphertext);
+
+    // Decryption
+    for(int i=0; i<len; i+=2) {
+        decryptPair(ciphertext[i], ciphertext[i+1], &plaintext[i], &plaintext[i+1]);
+    }
+    plaintext[len] = '\0';
+    printf("Recovered Plaintext: %s\n", plaintext);
+
+    return 0;
+}
