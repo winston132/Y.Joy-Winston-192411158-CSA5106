@@ -1,0 +1,98 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MOD 26
+
+// English letter frequency (approximate percentages)
+double englishFreq[26] = {
+    8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015,
+    6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749,
+    7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758,
+    0.978, 2.360, 0.150, 1.974, 0.074
+};
+
+// Score a candidate plaintext by comparing letter frequencies
+double scoreText(const char *text) {
+    int counts[26] = {0};
+    int total = 0;
+    for (int i = 0; text[i]; i++) {
+        if (isalpha(text[i])) {
+            counts[toupper(text[i]) - 'A']++;
+            total++;
+        }
+    }
+    if (total == 0) return 0.0;
+
+    double score = 0.0;
+    for (int i = 0; i < 26; i++) {
+        double observed = (double)counts[i] / total * 100.0;
+        score += englishFreq[i] * observed; // dot product similarity
+    }
+    return score;
+}
+
+// Decrypt with given shift
+void decrypt(const char *cipher, int shift, char *plain) {
+    int len = strlen(cipher);
+    for (int i = 0; i < len; i++) {
+        if (isalpha(cipher[i])) {
+            int c = toupper(cipher[i]) - 'A';
+            int p = (c - shift + MOD) % MOD;
+            plain[i] = 'A' + p;
+        } else {
+            plain[i] = cipher[i];
+        }
+    }
+    plain[len] = '\0';
+}
+
+int main() {
+    char cipher[] = "WKH TXLFN EURZQ IRA MXPSV RYHU WKH ODCB GRJ"; // Example Caesar cipher
+    int topN = 10; // user can change this
+
+    struct {
+        double score;
+        int shift;
+        char text[256];
+    } results[26];
+
+    // Try all shifts
+    for (int s = 0; s < 26; s++) {
+        char plain[256];
+        decrypt(cipher, s, plain);
+        results[s].score = scoreText(plain);
+        results[s].shift = s;
+        strcpy(results[s].text, plain);
+    }
+
+    // Sort results by score (descending)
+    for (int i = 0; i < 26; i++) {
+        for (int j = i+1; j < 26; j++) {
+            if (results[j].score > results[i].score) {
+                // swap
+                double tmpScore = results[i].score;
+                int tmpShift = results[i].shift;
+                char tmpText[256];
+                strcpy(tmpText, results[i].text);
+
+                results[i].score = results[j].score;
+                results[i].shift = results[j].shift;
+                strcpy(results[i].text, results[j].text);
+
+                results[j].score = tmpScore;
+                results[j].shift = tmpShift;
+                strcpy(results[j].text, tmpText);
+            }
+        }
+    }
+
+    // Print top N results
+    printf("Ciphertext: %s\n\n", cipher);
+    printf("Top %d candidate plaintexts:\n", topN);
+    for (int i = 0; i < topN && i < 26; i++) {
+        printf("Shift %2d | Score %.2f | %s\n", results[i].shift, results[i].score, results[i].text);
+    }
+
+    return 0;
+}
