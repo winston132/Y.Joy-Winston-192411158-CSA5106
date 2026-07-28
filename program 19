@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+// Placeholder DES encryption function (replace with full DES implementation)
+uint64_t DES(uint64_t block, uint64_t key) {
+    // Apply DES round function here
+    return block ^ key; // simplified placeholder
+}
+
+// 3DES encryption: EDE (Encrypt–Decrypt–Encrypt)
+uint64_t TripleDES(uint64_t block, uint64_t key1, uint64_t key2, uint64_t key3) {
+    uint64_t step1 = DES(block, key1);       // Encrypt with key1
+    uint64_t step2 = DES(step1, key2);       // Decrypt with key2
+    uint64_t step3 = DES(step2, key3);       // Encrypt with key3
+    return step3;
+}
+
+// CBC mode encryption
+void CBC_Encrypt(uint64_t *plaintext, uint64_t *ciphertext, int blocks,
+                 uint64_t iv, uint64_t key1, uint64_t key2, uint64_t key3) {
+    uint64_t prev = iv;
+    for (int i = 0; i < blocks; i++) {
+        uint64_t xored = plaintext[i] ^ prev;
+        ciphertext[i] = TripleDES(xored, key1, key2, key3);
+        prev = ciphertext[i];
+    }
+}
+
+int main() {
+    // Example: 2 blocks of plaintext
+    uint64_t plaintext[2] = {0x0123456789ABCDEFULL, 0x1111111111111111ULL};
+    uint64_t ciphertext[2];
+
+    // Keys and IV
+    uint64_t key1 = 0x133457799BBCDFF1ULL;
+    uint64_t key2 = 0x1A1B1C1D1E1F2021ULL;
+    uint64_t key3 = 0x2233445566778899ULL;
+    uint64_t iv   = 0xAABB09182736CCDDULL;
+
+    CBC_Encrypt(plaintext, ciphertext, 2, iv, key1, key2, key3);
+
+    printf("Ciphertext blocks:\n");
+    for (int i = 0; i < 2; i++) {
+        printf("Block %d: %016llX\n", i+1, ciphertext[i]);
+    }
+
+    return 0;
+}
