@@ -1,0 +1,84 @@
+#include <stdio.h>
+
+// Function to find GCD
+int gcd(int a, int b) {
+    while (b != 0) {
+        int t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
+}
+
+// Function to find modular inverse using Extended Euclidean Algorithm
+int modInverse(int e, int phi) {
+    int t = 0, newt = 1;
+    int r = phi, newr = e;
+
+    while (newr != 0) {
+        int q = r / newr;
+
+        int temp = newt;
+        newt = t - q * newt;
+        t = temp;
+
+        temp = newr;
+        newr = r - q * newr;
+        r = temp;
+    }
+
+    if (r > 1)
+        return -1;
+
+    if (t < 0)
+        t += phi;
+
+    return t;
+}
+
+// Modular exponentiation
+long long modPow(long long base, long long exp, long long mod) {
+    long long result = 1;
+    base %= mod;
+
+    while (exp > 0) {
+        if (exp % 2 == 1)
+            result = (result * base) % mod;
+
+        base = (base * base) % mod;
+        exp /= 2;
+    }
+
+    return result;
+}
+
+int main() {
+    int p = 59;
+    int q = 61;
+    int n = p * q;
+    int phi = (p - 1) * (q - 1);
+
+    int e = 31;
+    int d = modInverse(e, phi);
+
+    printf("RSA Key Generation\n");
+    printf("------------------\n");
+    printf("p = %d\n", p);
+    printf("q = %d\n", q);
+    printf("n = %d\n", n);
+    printf("phi(n) = %d\n", phi);
+    printf("Public Key (e,n) = (%d,%d)\n", e, n);
+    printf("Private Key (d,n) = (%d,%d)\n", d, n);
+
+    long long message;
+    printf("\nEnter message (< %d): ", n);
+    scanf("%lld", &message);
+
+    long long cipher = modPow(message, e, n);
+    long long plain = modPow(cipher, d, n);
+
+    printf("Encrypted Message = %lld\n", cipher);
+    printf("Decrypted Message = %lld\n", plain);
+
+    return 0;
+}
