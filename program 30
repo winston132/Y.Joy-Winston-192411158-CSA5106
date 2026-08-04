@@ -1,0 +1,67 @@
+#include <stdio.h>
+
+// Toy block cipher (XOR encryption)
+unsigned char encrypt(unsigned char data, unsigned char key)
+{
+    return data ^ key;
+}
+
+// CBC-MAC for one block
+unsigned char CBC_MAC(unsigned char message, unsigned char key)
+{
+    return encrypt(message, key);
+}
+
+int main()
+{
+    unsigned char key;
+    unsigned char X;
+    unsigned char T;
+
+    unsigned char block2;
+    unsigned char mac_two_block;
+
+    printf("Enter secret key (0-255): ");
+    scanf("%hhu", &key);
+
+    printf("Enter one block message X (0-255): ");
+    scanf("%hhu", &X);
+
+
+    // MAC of one-block message
+    T = CBC_MAC(X, key);
+
+    printf("\nMAC(K,X) = %u\n", T);
+
+
+    // Attacker creates X || (X XOR T)
+    block2 = X ^ T;
+
+    printf("\nForged two-block message:\n");
+    printf("Block 1 = %u\n", X);
+    printf("Block 2 = %u\n", block2);
+
+
+    // CBC-MAC computation for two blocks
+    unsigned char C1;
+    unsigned char C2;
+
+    C1 = encrypt(X, key);
+
+    C2 = encrypt(block2 ^ C1, key);
+
+
+    mac_two_block = C2;
+
+    printf("\nCBC-MAC of forged message = %u\n", mac_two_block);
+
+    printf("\nOriginal MAC = %u\n", T);
+
+    if(mac_two_block == T)
+        printf("\nAttack successful: MAC values are identical!\n");
+    else
+        printf("\nAttack failed.\n");
+
+
+    return 0;
+}
