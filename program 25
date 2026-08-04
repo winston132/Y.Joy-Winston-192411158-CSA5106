@@ -1,0 +1,65 @@
+#include <stdio.h>
+
+// Function to find GCD using Euclidean Algorithm
+int gcd(int a, int b) {
+    while (b != 0) {
+        int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
+
+// Function to find modular inverse using Extended Euclidean Algorithm
+int modInverse(int e, int phi) {
+    int t = 0, newt = 1;
+    int r = phi, newr = e;
+
+    while (newr != 0) {
+        int q = r / newr;
+
+        int temp = newt;
+        newt = t - q * newt;
+        t = temp;
+
+        temp = newr;
+        newr = r - q * newr;
+        r = temp;
+    }
+
+    if (t < 0)
+        t += phi;
+
+    return t;
+}
+
+int main() {
+    int n, e, m;
+
+    printf("Enter n: ");
+    scanf("%d", &n);
+
+    printf("Enter public key e: ");
+    scanf("%d", &e);
+
+    printf("Enter known plaintext block: ");
+    scanf("%d", &m);
+
+    int p = gcd(n, m);
+
+    if (p == 1 || p == n) {
+        printf("\nNo common factor found.\n");
+    } else {
+        int q = n / p;
+        int phi = (p - 1) * (q - 1);
+        int d = modInverse(e, phi);
+
+        printf("\nCommon factor found!\n");
+        printf("p = %d\n", p);
+        printf("q = %d\n", q);
+        printf("phi(n) = %d\n", phi);
+        printf("Private key d = %d\n", d);
+    }
+
+    return 0;
+}
