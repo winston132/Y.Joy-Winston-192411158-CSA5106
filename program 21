@@ -1,0 +1,103 @@
+#include <stdio.h>
+#include <string.h>
+
+#define BLOCK_SIZE 8
+
+// Toy block cipher: XOR each byte with key
+void encryptBlock(char *block, char *key, char *out) {
+    for (int i = 0; i < BLOCK_SIZE; i++)
+        out[i] = block[i] ^ key[i];
+}
+
+// ---------------- ECB ----------------
+void ECB(char *plaintext, char *key, int blocks) {
+    char out[BLOCK_SIZE];
+
+    printf("\nECB Encryption:\n");
+    for (int i = 0; i < blocks; i++) {
+        encryptBlock(plaintext + i * BLOCK_SIZE, key, out);
+
+        printf("Block %d: ", i + 1);
+        for (int j = 0; j < BLOCK_SIZE; j++)
+            printf("%02X ", (unsigned char)out[j]);
+        printf("\n");
+    }
+}
+
+// ---------------- CBC ----------------
+void CBC(char *plaintext, char *key, char *iv, int blocks) {
+    char temp[BLOCK_SIZE], cipher[BLOCK_SIZE];
+
+    memcpy(temp, iv, BLOCK_SIZE);
+
+    printf("\nCBC Encryption:\n");
+
+    for (int i = 0; i < blocks; i++) {
+
+        for (int j = 0; j < BLOCK_SIZE; j++)
+            temp[j] ^= plaintext[i * BLOCK_SIZE + j];
+
+        encryptBlock(temp, key, cipher);
+
+        printf("Block %d: ", i + 1);
+        for (int j = 0; j < BLOCK_SIZE; j++)
+            printf("%02X ", (unsigned char)cipher[j]);
+        printf("\n");
+
+        memcpy(temp, cipher, BLOCK_SIZE);
+    }
+}
+
+// ---------------- CFB ----------------
+void CFB(char *plaintext, char *key, char *iv, int blocks) {
+    char shift[BLOCK_SIZE], temp[BLOCK_SIZE], cipher[BLOCK_SIZE];
+
+    memcpy(shift, iv, BLOCK_SIZE);
+
+    printf("\nCFB Encryption:\n");
+
+    for (int i = 0; i < blocks; i++) {
+
+        encryptBlock(shift, key, temp);
+
+        for (int j = 0; j < BLOCK_SIZE; j++)
+            cipher[j] = temp[j] ^ plaintext[i * BLOCK_SIZE + j];
+
+        printf("Block %d: ", i + 1);
+        for (int j = 0; j < BLOCK_SIZE; j++)
+            printf("%02X ", (unsigned char)cipher[j]);
+        printf("\n");
+
+        memcpy(shift, cipher, BLOCK_SIZE);
+    }
+}
+
+int main() {
+
+    char plaintext[64];
+    char key[BLOCK_SIZE] = "12345678";
+    char iv[BLOCK_SIZE] = "ABCDEFGH";
+
+    printf("Enter plaintext (multiple of 8 characters): ");
+    fgets(plaintext, sizeof(plaintext), stdin);
+
+    int len = strlen(plaintext);
+
+    if (plaintext[len - 1] == '\n') {
+        plaintext[len - 1] = '\0';
+        len--;
+    }
+
+    if (len % BLOCK_SIZE != 0) {
+        printf("Error: Plaintext length must be a multiple of %d bytes.\n", BLOCK_SIZE);
+        return 0;
+    }
+
+    int blocks = len / BLOCK_SIZE;
+
+    ECB(plaintext, key, blocks);
+    CBC(plaintext, key, iv, blocks);
+    CFB(plaintext, key, iv, blocks);
+
+    return 0;
+}
