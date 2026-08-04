@@ -1,0 +1,58 @@
+#include <stdio.h>
+
+#define BLOCKS 3
+
+// Toy block cipher (XOR with key)
+unsigned char encrypt(unsigned char input, unsigned char key) {
+    return input ^ key;
+}
+
+int main() {
+    // Plaintext: 00000001 00000010 00000100
+    unsigned char plaintext[BLOCKS] = {0x01, 0x02, 0x04};
+
+    // Counter starts at 00000000
+    unsigned char counter = 0x00;
+
+    // Example key (derived from 0111111101)
+    unsigned char key = 0x7D;
+
+    unsigned char ciphertext[BLOCKS];
+    unsigned char decrypted[BLOCKS];
+
+    printf("CTR Mode Encryption\n");
+    printf("-----------------------\n");
+
+    // Encryption
+    for (int i = 0; i < BLOCKS; i++) {
+        unsigned char keystream = encrypt(counter, key);
+        ciphertext[i] = plaintext[i] ^ keystream;
+
+        printf("Cipher Block %d = %02X\n", i + 1, ciphertext[i]);
+
+        counter++;
+    }
+
+    printf("\nCTR Mode Decryption\n");
+    printf("-----------------------\n");
+
+    counter = 0x00;
+
+    // Decryption
+    for (int i = 0; i < BLOCKS; i++) {
+        unsigned char keystream = encrypt(counter, key);
+        decrypted[i] = ciphertext[i] ^ keystream;
+
+        printf("Plain Block %d = %02X\n", i + 1, decrypted[i]);
+
+        counter++;
+    }
+
+    printf("\nRecovered Plaintext: ");
+    for (int i = 0; i < BLOCKS; i++)
+        printf("%02X ", decrypted[i]);
+
+    printf("\n");
+
+    return 0;
+}
