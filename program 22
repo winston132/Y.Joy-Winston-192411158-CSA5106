@@ -1,0 +1,63 @@
+#include <stdio.h>
+
+#define BLOCKS 2
+
+// Simple XOR encryption (used here as a toy block cipher)
+unsigned char encrypt(unsigned char data, unsigned char key) {
+    return data ^ key;
+}
+
+// Same operation for XOR decryption
+unsigned char decrypt(unsigned char data, unsigned char key) {
+    return data ^ key;
+}
+
+int main() {
+    // Plaintext: 00000001 00100011
+    unsigned char plaintext[BLOCKS] = {0x01, 0x23};
+
+    // Binary IV = 10101010
+    unsigned char IV = 0xAA;
+
+    // Example key (derived from 0111111101 for demonstration)
+    unsigned char key = 0x7D;
+
+    unsigned char ciphertext[BLOCKS];
+    unsigned char decrypted[BLOCKS];
+
+    unsigned char prev = IV;
+
+    printf("CBC Encryption\n");
+    printf("-----------------------\n");
+
+    // Encryption
+    for (int i = 0; i < BLOCKS; i++) {
+        unsigned char x = plaintext[i] ^ prev;
+        ciphertext[i] = encrypt(x, key);
+        prev = ciphertext[i];
+
+        printf("Cipher Block %d = %02X\n", i + 1, ciphertext[i]);
+    }
+
+    printf("\nCBC Decryption\n");
+    printf("-----------------------\n");
+
+    prev = IV;
+
+    // Decryption
+    for (int i = 0; i < BLOCKS; i++) {
+        unsigned char x = decrypt(ciphertext[i], key);
+        decrypted[i] = x ^ prev;
+        prev = ciphertext[i];
+
+        printf("Plain Block %d = %02X\n", i + 1, decrypted[i]);
+    }
+
+    printf("\nRecovered Plaintext: ");
+    for (int i = 0; i < BLOCKS; i++)
+        printf("%02X ", decrypted[i]);
+
+    printf("\n");
+
+    return 0;
+}
