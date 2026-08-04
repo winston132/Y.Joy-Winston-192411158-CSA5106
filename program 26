@@ -1,0 +1,40 @@
+#include <stdio.h>
+
+// Modular exponentiation
+long long modPow(long long base, long long exp, long long mod) {
+    long long result = 1;
+    base %= mod;
+
+    while (exp > 0) {
+        if (exp % 2 == 1)
+            result = (result * base) % mod;
+
+        base = (base * base) % mod;
+        exp /= 2;
+    }
+    return result;
+}
+
+int main() {
+    long long n, e, d, message;
+
+    printf("Enter modulus (n): ");
+    scanf("%lld", &n);
+
+    printf("Enter public key (e): ");
+    scanf("%lld", &e);
+
+    printf("Enter private key (d): ");
+    scanf("%lld", &d);
+
+    printf("Enter message (< n): ");
+    scanf("%lld", &message);
+
+    long long cipher = modPow(message, e, n);
+    printf("Encrypted Message = %lld\n", cipher);
+
+    long long plain = modPow(cipher, d, n);
+    printf("Decrypted Message = %lld\n", plain);
+
+    return 0;
+}
