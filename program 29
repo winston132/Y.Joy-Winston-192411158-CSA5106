@@ -1,0 +1,30 @@
+#include <stdio.h>
+
+int main() {
+    int totalLanes = 25;        // SHA-3 state = 5 × 5 lanes
+    int laneSize = 64;          // 1600/25 = 64 bits per lane
+
+    int rate = 1024;            // Block size (rate)
+    int rateLanes = rate / laneSize;      // 16 lanes
+
+    int capacityLanes = totalLanes - rateLanes;   // 9 lanes
+
+    printf("SHA-3 Sponge Analysis\n");
+    printf("---------------------\n");
+    printf("Total lanes        : %d\n", totalLanes);
+    printf("Rate lanes         : %d\n", rateLanes);
+    printf("Capacity lanes     : %d\n\n", capacityLanes);
+
+    printf("Initially:\n");
+    printf("Rate lanes contain message bits.\n");
+    printf("Capacity lanes are all zeros.\n\n");
+
+    printf("Ignoring the permutation...\n");
+
+    for (int i = 1; i <= capacityLanes; i++)
+        printf("Step %d : Capacity lane %d becomes non-zero.\n", i, i);
+
+    printf("\nTotal steps required = %d\n", capacityLanes);
+
+    return 0;
+}
